@@ -15,8 +15,8 @@ class rnn_lm(object):
               embedding_size=64,
               hidden_size=128,
               dropout_rate=0.5,
-              batch_size=BATCH_SIZE,
-              num_steps = NUM_STEPS,
+              batch_size=32,
+              num_steps = 50,
               is_training=True):
     # hyperparameters that can be changed
     self.which_cell = cell
