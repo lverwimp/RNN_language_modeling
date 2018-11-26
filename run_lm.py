@@ -88,3 +88,71 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
         else:
 
           return None
+
+def run_epoch(session, rnn, data, is_training=True, is_test=False, test_log_prob=False):
+    '''
+    This function runs a single epoch (pass) over the data,
+    updating the model parameters if we are training,
+    and returns the perplexity.
+    Input arguments:
+      rnn: object of the rnn_lm class
+      data: list of word indices
+      is_training: boolean, True is we are training the model
+      is_test: boolean, True is we are testing a trained model
+    Returns:
+      ppl: float, perplexity of the dataset
+    '''
+  
+    generator = batchGenerator(data, test=is_test)
+      
+    state = session.run(rnn.initial_state)
+    sum_loss = 0.0
+    iters = 0
+    
+    if test_log_prob: 
+      sum_log_prob = 0.0
+      
+    while True:
+
+      input_batch, target_batch, end_reached = generator.generate()
+        
+      if end_reached:
+        break
+
+      feed_dict = {rnn.inputs: input_batch,
+                  rnn.targets: target_batch,
+                  rnn.initial_state : state}
+
+      fetches = {'loss': rnn.loss,
+                'state': rnn.state}
+      
+      if is_training:
+        fetches['train_op'] = rnn.train_op
+        
+      if test_log_prob:
+        fetches['softmax'] = rnn.softmax
+        
+      result = session.run(fetches, feed_dict)
+        
+      state = result['state']
+      loss = result['loss']
+      
+      if test_log_prob:
+        softmax = result['softmax']
+        prob_target = softmax[0][target_batch[0][0]]
+        sum_log_prob += np.log(prob_target)
+
+      sum_loss += loss
+      # the loss is an average over num_steps
+      if is_test:
+        iters += 1
+      else:
+        iters += NUM_STEPS
+        
+    # calculate perplexity    
+    ppl = np.exp(sum_loss / iters)
+    
+    if test_log_prob:
+      print('Log probability: {0}'.format(sum_log_prob))
+    
+    return ppl
