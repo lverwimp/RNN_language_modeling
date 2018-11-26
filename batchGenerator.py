@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+import numpy as np
+
 class batchGenerator(object):
   '''
   This class generates batches for a dataset.
