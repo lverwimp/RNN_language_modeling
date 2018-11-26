@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+import tensorflow as tf
+
 def run_lm(cell='LSTM', optimizer='SGD', lr=1, 
            embedding_size=64, hidden_size=128, 
            dropout_rate=0.5, inspect_emb=False,
