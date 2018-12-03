@@ -1,15 +1,35 @@
 #! /usr/bin/env python
 
 import tensorflow as tf
+import numpy as np
+import batchGenerator, rnn_lm
 
-def run_lm(cell='LSTM', optimizer='SGD', lr=1, 
-           embedding_size=64, hidden_size=128, 
-           dropout_rate=0.5, inspect_emb=False,
-           train_ids=None, valid_ids=None, test_ids=None,
-           test_log_prob=False):
+def run_lm(name='LSTM', cell='LSTM', 
+           optimizer='Adam', lr=0.01, 
+           vocab_size = 10000, embedding_size=64, 
+           hidden_size=128, dropout_rate=0.5, 
+           num_steps=50, inspect_emb=False, 
+           train_ids=None, valid_ids=None, 
+           test_ids=None, test_log_prob=False):
   '''
   Creates training, validation and/or test models,
   trains, validates and/or tests the model.
+  Arguments:
+    name: name that will be used to save the model
+    cell: type of RNN cell (only LSTM is currently implemented)
+    optimizer: 'SGD' or 'Adam'
+    lr: learning rate
+    vocab_size: size of the vocabulary
+    embedding_size: size of continuous embedding that will be input to the RNN
+    hidden_size: size of the hidden layer
+    dropout rate: value between 0 and 1, number of neurons that will be 
+        kept (not dropped) during training, prevents overfitting
+    num_steps
+    inspect_emb: boolean, if True we want to return the embedding_matrix
+    train_ids: training data
+    valid_ids: validation data
+    test_ids: test data
+    test_log_prob: boolean, if True we only want to test the log probability for a test sentence
   '''
     
   with tf.Graph().as_default() as graph:
@@ -29,7 +49,7 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
           saver = tf.train.Saver()
 
         with tf.variable_scope("Model", reuse=True):
-          rnn_valid = rnn_lm(cell=cell, 
+          rnn_valid = rnn_lm.rnn_lm(cell=cell, 
                              optimizer=optimizer,
                              lr=lr,
                              vocab_size=vocab_size, 
@@ -44,7 +64,7 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
         reuse = False
                
       with tf.variable_scope("Model", reuse=reuse):
-        rnn_test = rnn_lm(cell=cell, 
+        rnn_test = rnn_lm.rnn_lm(cell=cell, 
                            optimizer=optimizer, 
                            lr=lr,
                            vocab_size=vocab_size,
@@ -56,7 +76,7 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
                            is_training=False)
       
 
-      sv = tf.train.Supervisor(logdir='models')
+      sv = tf.train.Supervisor(logdir=name)
 
       with sv.managed_session(config=tf.ConfigProto()) as session:
         
@@ -66,16 +86,16 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
 
             print('Epoch {0}'.format(i+1))
 
-            train_ppl = run_epoch(session, rnn_train, train_ids)
+            train_ppl = run_epoch(session, rnn_train, train_ids, num_steps=num_steps)
             print('Train perplexity: {0}'.format(train_ppl))
 
-            valid_ppl = run_epoch(session, rnn_valid, valid_ids, is_training=False)
+            valid_ppl = run_epoch(session, rnn_valid, valid_ids, num_steps=num_steps, is_training=False)
             print('Validation perplexity: {0}'.format(valid_ppl))
 
-          save_path = saver.save(session, "models/rnn.ckpt")
+          save_path = saver.save(session, "{0}/rnn.ckpt".format(name))
           print('Saved the model to ',save_path)
 
-        test_ppl = run_epoch(session, rnn_test, test_ids, 
+        test_ppl = run_epoch(session, rnn_test, test_ids, num_steps=num_steps,
                              is_training=False, is_test=True, 
                              test_log_prob=test_log_prob)
         if not test_log_prob:
@@ -91,7 +111,7 @@ def run_lm(cell='LSTM', optimizer='SGD', lr=1,
 
           return None
 
-def run_epoch(session, rnn, data, is_training=True, is_test=False, test_log_prob=False):
+def run_epoch(session, rnn, data, num_steps=50, is_training=True, is_test=False, test_log_prob=False):
     '''
     This function runs a single epoch (pass) over the data,
     updating the model parameters if we are training,
@@ -99,13 +119,15 @@ def run_epoch(session, rnn, data, is_training=True, is_test=False, test_log_prob
     Input arguments:
       rnn: object of the rnn_lm class
       data: list of word indices
+      num_steps
       is_training: boolean, True is we are training the model
       is_test: boolean, True is we are testing a trained model
+      test_log_prob: boolean, True if we want the log probability
     Returns:
       ppl: float, perplexity of the dataset
     '''
   
-    generator = batchGenerator(data, test=is_test)
+    generator = batchGenerator.batchGenerator(data, test=is_test)
       
     state = session.run(rnn.initial_state)
     sum_loss = 0.0
@@ -149,7 +171,7 @@ def run_epoch(session, rnn, data, is_training=True, is_test=False, test_log_prob
       if is_test:
         iters += 1
       else:
-        iters += NUM_STEPS
+        iters += num_steps
         
     # calculate perplexity    
     ppl = np.exp(sum_loss / iters)
