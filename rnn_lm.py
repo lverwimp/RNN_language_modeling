@@ -5,12 +5,24 @@ import tensorflow as tf
 class rnn_lm(object):
   '''
   This is a class to build and execute a recurrent neural network language model.
+  Arguments:
+    cell: type of RNN cell (only LSTM is currently implemented)
+    optimizer: 'SGD' or 'Adam'
+    lr: learning rate
+    vocab_size: size of the vocabulary
+    embedding_size: size of continuous embedding that will be input to the RNN
+    hidden_size: size of the hidden layer
+    dropout rate: value between 0 and 1, number of neurons that will be 
+        kept (not dropped) during training, prevents overfitting
+    batch_size: number of sequences that will be input simultaneously
+    num_steps: length of each input sequence = number of steps in backpropagation through time
+    is_training: boolean, True is we want to update the parameters of the model
   '''
   
   def __init__(self,
               cell='LSTM',
-              optimizer='SGD',
-              lr=1,
+              optimizer='Adam',
+              lr=0.01,
               vocab_size=10000,
               embedding_size=64,
               hidden_size=128,
