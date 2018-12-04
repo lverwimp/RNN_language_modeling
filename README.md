@@ -9,6 +9,6 @@ Follow these steps to get started:
 
 * To be able to use Google Colab, you need to have a Google account. If you have one, make sure you are logged in. 
 * Download the files in download/ and save them locally on your computer. These contain Python classes and functions that you will import in the notebook, but you don't need to know the details of their workings. 
-* Open rnn_lm.ipynb and click on 'Open in Colab' at the top of the file.
+* Open rnn_lm.ipynb in your browser and click on 'Open in Colab' at the top of the file.
 
 
