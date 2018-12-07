@@ -19,7 +19,7 @@ This exercise should be run in [Google Colab](https://colab.research.google.com/
 
 A notebook contains a combination of text and Python code and is organized in cells. Text cells are just meant to contain an explanation of what is going on. Code cells can be executed one at a time by clicking on the arrow pointing to the cell. This step-by-step execution let's you follow at an easy pace what is going on in a long and complex program. Strictly speaking there is no requirement that you execute cells from top to bottom, but in practice notebooks are typically organized as such.
 
-Our notebook contains Python code. Most of the code (with the explanation) will be self explanatory. If your not familiar with Python, following information may be worthwhile reading:
+Our notebook contains Python code. Most of the code (with the explanation) will be self-explanatory. If your not familiar with Python, following information may be worthwhile reading:
 
 * Python uses indexing starting at 0
 * The import statement defines packages and parts thereof for you current program
