@@ -13,7 +13,7 @@ This exercise should be run in [Google Colab](https://colab.research.google.com/
 
 * To be able to use Google Colab, you need to have a Google account. If you have one, make sure you are logged in. 
 * In your browser, click on rnn_lm.ipynb on the Github page. Once the notebook has opened, click on 'Open in Colab' at the top of the file.
-* When you try to run one of the cells, you will get a warning about the fact that the notebook not authored is by Google. Make sure that you tick the box 'Reset all runtimes before running' and then click on 'Run anyway'. It will ask for confirmation, so click 'yes'.
+* When you try to run one of the cells, you will get a warning about the fact that the notebook is not authored by Google. Make sure that you tick the box 'Reset all runtimes before running' and then click on 'Run anyway'. It will ask for confirmation, so click 'yes'.
 
 ## Notes on Notebooks, Python, TensorFlow
 
